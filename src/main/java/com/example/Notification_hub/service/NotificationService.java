@@ -24,5 +24,12 @@ public class NotificationService {
         return repository.save(notification);
     }
 
+    public Notification getNotificationByID(Long ID){
+        log.info("Получение уведомления по id");
+
+       return repository.findById(ID).orElseThrow(() -> new RuntimeException("Уведомление не найдено"));
+
+    }
+
 
 }
