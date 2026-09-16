@@ -2,6 +2,7 @@ package com.example.Notification_hub.service;
 
 
 import com.example.Notification_hub.entity.Notification;
+import com.example.Notification_hub.exception.NotificationNotFoundException;
 import com.example.Notification_hub.repository.NotificationRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -27,7 +28,7 @@ public class NotificationService {
     public Notification getNotificationByID(Long ID){
         log.info("Получение уведомления по id");
 
-       return repository.findById(ID).orElseThrow(() -> new RuntimeException("Уведомление не найдено"));
+        return repository.findById(ID).orElseThrow(() -> new NotificationNotFoundException("Уведомление с ID " + ID + " не найдено"));
 
     }
 
