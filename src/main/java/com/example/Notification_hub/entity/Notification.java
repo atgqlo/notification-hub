@@ -31,8 +31,6 @@ public class Notification {
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
 
-    protected void onCreated(){
-        this.createdAt = LocalDateTime.now();
-    }
+
 
 }
