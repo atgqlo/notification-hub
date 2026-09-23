@@ -10,3 +10,15 @@ spring:
     hibernate:
       ddl-auto: validate
     show-sql: true
+
+  mail:
+    host: smtp.yandex.ru
+    port: 465
+    username: ${MAIL_USERNAME}
+    password: ${MAIL_PASSWORD}
+    properties:
+      mail:
+        smtp:
+          auth: true
+          ssl:
+            enable: true
