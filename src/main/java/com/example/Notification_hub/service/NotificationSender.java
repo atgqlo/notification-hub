@@ -5,6 +5,11 @@ import com.example.Notification_hub.entity.Notification;
 import com.example.Notification_hub.repository.NotificationRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.mail.MailException;
+import org.springframework.mail.SimpleMailMessage;
+import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 @Slf4j
@@ -12,19 +17,34 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class NotificationSender {
     private final NotificationRepository repository;
-    public void send(Notification notification){
+    private final JavaMailSender mailSender;
+
+
+    @Value("${spring.mail.username}")
+    private String fromEmail;
+
+    @Async("notificationExecutor")
+    public void send(Notification notification) {
         try{
-            log.info("Поток [{}] взял в работу уведомление ID {} для {}", Thread.currentThread().getName(), notification.getId(), notification.getRecipient());
-            Thread.sleep(2000);
+            log.info("Поток [{}] начинает отправку письма на {}", Thread.currentThread().getName(), notification.getRecipient());
+
+            SimpleMailMessage mailMessage = new SimpleMailMessage();
+            mailMessage.setFrom(fromEmail);
+            mailMessage.setTo(notification.getRecipient());
+            mailMessage.setSubject("Уведомление от NotificationHub");
+            mailMessage.setText(notification.getMessage());
+
+            mailSender.send(mailMessage);
 
             notification.setStatus("SENT");
             repository.save(notification);
-            log.info("Уведомление с ID {} успешно отправлено!", notification.getId());
-        } catch (InterruptedException e) {
-           log.error("Ошибка при отпраке: ", e);
-           Thread.currentThread().interrupt();
-        }
 
+            log.info("Письмо на {} успешно отправлено", notification.getRecipient());
+        }catch (MailException e){
+            log.error("Ошибка сети при отправке на {}", notification.getRecipient(), e);
+            notification.setStatus("FAILED");
+            repository.save(notification);
+        }
 
     }
 }
