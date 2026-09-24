@@ -42,7 +42,15 @@ public class NotificationSender {
             log.info("Письмо на {} успешно отправлено", notification.getRecipient());
         }catch (MailException e){
             log.error("Ошибка сети при отправке на {}", notification.getRecipient(), e);
-            notification.setStatus("FAILED");
+            int maxRetries = 3;
+            if (notification.getRetryCount() < maxRetries){
+                notification.setRetryCount(notification.getRetryCount() + 1);
+                notification.setStatus("PENDING");
+                log.warn("Попытка {} из {}. Задача возвращена в PENDING", notification.getRetryCount(), maxRetries);
+            }else{
+                notification.setStatus("FAILED");
+                log.error("Исчерпан лимит попыток для {}", notification.getRecipient());
+            }
             repository.save(notification);
         }
 

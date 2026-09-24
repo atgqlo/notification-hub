@@ -24,8 +24,6 @@ public class NotificationService {
 
         notification.setStatus("PENDING");
 
-        notification.setCreatedAt(java.time.LocalDateTime.now());
-
         return repository.save(notification);
     }
 
