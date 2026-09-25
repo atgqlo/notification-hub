@@ -1,6 +1,7 @@
 package com.example.Notification_hub.controller;
 
 
+import com.example.Notification_hub.DTO.CreateNotificationRequest;
 import com.example.Notification_hub.entity.Notification;
 import com.example.Notification_hub.service.NotificationService;
 import jakarta.validation.Valid;
@@ -19,8 +20,8 @@ public class NotificationController {
 
 
     @PostMapping
-    public ResponseEntity<Notification> createNotification(@Valid @RequestBody Notification notification){
-        Notification savedNotification = service.createNotification(notification);
+    public ResponseEntity<Notification> createNotification(@Valid @RequestBody CreateNotificationRequest request){
+        Notification savedNotification = service.createNotification(request);
 
         return ResponseEntity.status(HttpStatus.CREATED).body(savedNotification);
     }

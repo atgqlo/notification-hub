@@ -1,6 +1,7 @@
 package com.example.Notification_hub.service;
 
 
+import com.example.Notification_hub.DTO.CreateNotificationRequest;
 import com.example.Notification_hub.entity.Notification;
 import com.example.Notification_hub.exception.NotificationNotFoundException;
 import com.example.Notification_hub.repository.NotificationRepository;
@@ -19,10 +20,15 @@ public class NotificationService {
 
     private final NotificationRepository repository;
 
-    public Notification createNotification(Notification notification){
-        log.info("Создание нового уведомления для : {}", notification.getRecipient());
+    public Notification createNotification(CreateNotificationRequest request){
+        log.info("Создание нового уведомления для : {}", request.recipient());
 
-        notification.setStatus("PENDING");
+      Notification notification = new Notification();
+
+      notification.setStatus("PENDING");
+      notification.setRecipient(request.recipient());
+      notification.setChannel(request.channel());
+      notification.setMessage(request.message());
 
         return repository.save(notification);
     }
