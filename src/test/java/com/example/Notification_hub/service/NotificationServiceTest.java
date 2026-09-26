@@ -1,5 +1,6 @@
 package com.example.Notification_hub.service;
 
+import com.example.Notification_hub.DTO.CreateNotificationRequest;
 import com.example.Notification_hub.entity.Notification;
 import com.example.Notification_hub.repository.NotificationRepository;
 import org.junit.jupiter.api.Test;
@@ -25,10 +26,7 @@ class NotificationServiceTest {
     @Test
     void createNotification_ShouldSetPendingStatusAndSave() {
 
-        Notification input = new Notification();
-        input.setRecipient("test@mail.com");
-        input.setMessage("Привет!");
-        input.setChannel("EMAIL");
+        CreateNotificationRequest input = new CreateNotificationRequest("test@mail.com", "message", "EMAIL");
 
         Notification saved = new Notification();
         saved.setId(1L);

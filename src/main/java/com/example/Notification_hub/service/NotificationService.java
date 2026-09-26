@@ -13,6 +13,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 @Service
 @RequiredArgsConstructor
 @Slf4j
@@ -44,7 +46,15 @@ public class NotificationService {
         Pageable pageable = PageRequest.of(page, size, Sort.by("createdAt").descending());
         return repository.findAll(pageable);
     }
-
-
+    public List<Notification> fetchAndMarkInProgress(){
+        List<Notification> pendingList = repository.findTop10ByStatusOrderByCreatedAtAsc("PENDING");
+        if (pendingList.isEmpty()){
+            return pendingList;
+        }
+        for (Notification notification : pendingList){
+            notification.setStatus("PROGRESSING");
+        }
+        return repository.saveAll(pendingList);
+    }
 
 }
