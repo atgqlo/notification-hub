@@ -5,6 +5,9 @@ import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 import lombok.Data;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
@@ -12,32 +15,31 @@ import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "notifications")
-@Data
+@Getter
+@Setter
+@NoArgsConstructor
 public class Notification {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-
-    @NotBlank(message = "Email не может быть пустым")
-    @Email
     @Column(nullable = false)
     private String recipient;
 
-    @NotBlank(message = "Сообщение не может быть пустым")
     @Column(nullable = false)
-    @Size(min = 1, max = 500)
     private String message;
 
 
-    @NotBlank(message = "Канал связи обязателен")
+
+    @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private String channel;
+    private NotificationChannel channel;
 
 
+    @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private String status;
+    private NotificationStatus status;
 
 
     @CreationTimestamp

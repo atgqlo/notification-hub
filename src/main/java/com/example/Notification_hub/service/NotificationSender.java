@@ -2,6 +2,7 @@ package com.example.Notification_hub.service;
 
 
 import com.example.Notification_hub.entity.Notification;
+import com.example.Notification_hub.entity.NotificationStatus;
 import com.example.Notification_hub.repository.NotificationRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -36,7 +37,7 @@ public class NotificationSender {
 
             mailSender.send(mailMessage);
 
-            notification.setStatus("SENT");
+            notification.setStatus(NotificationStatus.SENT);
             repository.save(notification);
 
             log.info("Письмо на {} успешно отправлено", notification.getRecipient());
@@ -45,10 +46,10 @@ public class NotificationSender {
             int maxRetries = 3;
             if (notification.getRetryCount() < maxRetries){
                 notification.setRetryCount(notification.getRetryCount() + 1);
-                notification.setStatus("PENDING");
+                notification.setStatus(NotificationStatus.PENDING);
                 log.warn("Попытка {} из {}. Задача возвращена в PENDING", notification.getRetryCount(), maxRetries);
             }else{
-                notification.setStatus("FAILED");
+                notification.setStatus(NotificationStatus.FAILED);
                 log.error("Исчерпан лимит попыток для {}", notification.getRecipient());
             }
             repository.save(notification);
