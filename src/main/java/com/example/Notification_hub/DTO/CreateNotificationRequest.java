@@ -9,7 +9,6 @@ import jakarta.validation.constraints.Size;
 
 public record CreateNotificationRequest(
         @NotBlank(message = "Email не может быть пустым")
-        @Email
         String recipient,
 
         @NotBlank(message = "Сообщение не может быть пустым")
