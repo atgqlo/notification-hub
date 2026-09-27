@@ -2,6 +2,7 @@ package com.example.Notification_hub.repository;
 
 
 import com.example.Notification_hub.entity.Notification;
+import com.example.Notification_hub.entity.NotificationStatus;
 import jakarta.persistence.LockModeType;
 import jakarta.persistence.QueryHint;
 import org.hibernate.LockMode;
@@ -19,9 +20,9 @@ public interface NotificationRepository extends JpaRepository<Notification, Long
 
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     @QueryHints({@QueryHint(name = "jakarta.persistence.lock.timeout", value = "-2")})
-    public List<Notification> findTop10ByStatusOrderByCreatedAtAsc(String status);
+    public List<Notification> findTop10ByStatusOrderByCreatedAtAsc(NotificationStatus status);
 
-    List<Notification> findByStatusAndUpdatedAtBefore(String status, LocalDateTime thresholdTime);
+    List<Notification> findByStatusAndUpdatedAtBefore(NotificationStatus status, LocalDateTime thresholdTime);
 
 
 }

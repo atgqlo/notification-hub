@@ -32,12 +32,14 @@ public class Notification {
 
 
 
+    @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private String channel;
+    private NotificationChannel channel;
 
 
+    @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private String status;
+    private NotificationStatus status;
 
 
     @CreationTimestamp

@@ -3,8 +3,10 @@ package com.example.Notification_hub.service;
 
 import com.example.Notification_hub.DTO.CreateNotificationRequest;
 import com.example.Notification_hub.entity.Notification;
+import com.example.Notification_hub.entity.NotificationStatus;
 import com.example.Notification_hub.exception.NotificationNotFoundException;
 import com.example.Notification_hub.repository.NotificationRepository;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -27,7 +29,7 @@ public class NotificationService {
 
       Notification notification = new Notification();
 
-      notification.setStatus("PENDING");
+      notification.setStatus(NotificationStatus.PENDING);
       notification.setRecipient(request.recipient());
       notification.setChannel(request.channel());
       notification.setMessage(request.message());
@@ -46,13 +48,15 @@ public class NotificationService {
         Pageable pageable = PageRequest.of(page, size, Sort.by("createdAt").descending());
         return repository.findAll(pageable);
     }
+
+    @Transactional
     public List<Notification> fetchAndMarkInProgress(){
-        List<Notification> pendingList = repository.findTop10ByStatusOrderByCreatedAtAsc("PENDING");
+        List<Notification> pendingList = repository.findTop10ByStatusOrderByCreatedAtAsc(NotificationStatus.PENDING);
         if (pendingList.isEmpty()){
             return pendingList;
         }
         for (Notification notification : pendingList){
-            notification.setStatus("PROGRESSING");
+            notification.setStatus(NotificationStatus.PROGRESSING);
         }
         return repository.saveAll(pendingList);
     }
