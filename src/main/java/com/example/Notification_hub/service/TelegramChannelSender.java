@@ -16,6 +16,6 @@ public class TelegramChannelSender implements ChannelSender {
 
     @Override
     public NotificationChannel getChannel() {
-        return NotificationChannel.Telegram;
+        return NotificationChannel.TELEGRAM;
     }
 }

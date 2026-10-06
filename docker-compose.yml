@@ -1,37 +1,58 @@
 version: '3.8'
 
 services:
-  db:
+  notification_db:
     image: postgres:15-alpine
-    container_name: notification_db
-    ports:
-      - "${DB_PORT}:5432"
     environment:
-      POSTGRES_USER: ${DB_USER}
-      POSTGRES_PASSWORD: ${DB_PASSWORD}
-      POSTGRES_DB: ${DB_NAME}
-    volumes:
-      - pgdata:/var/lib/postgresql/data
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${DB_USER} -d ${DB_NAME}"]
-      interval: 5s
-      timeout: 5s
-      retries: 5
+      POSTGRES_USER: ${DB_USER:-postgres}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-password}
+      POSTGRES_DB: ${NOTIFICATION_DB_NAME:-notificationdb}
+    ports:
+      - "5434:5432"
+    networks:
+      - shared_kafka_net
 
-  app:
+  monitor_kafka:
+    image: apache/kafka:3.8.0
+    container_name: monitor_kafka
+    ports:
+      - "9092:9092"
+    environment:
+      KAFKA_NODE_ID: 1
+      KAFKA_PROCESS_ROLES: broker,controller
+      KAFKA_LISTENERS: PLAINTEXT://0.0.0.0:29092,PLAINTEXT_HOST://0.0.0.0:9092,CONTROLLER://0.0.0.0:9093
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://monitor_kafka:29092,PLAINTEXT_HOST://localhost:9092
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
+      KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER
+      KAFKA_CONTROLLER_QUORUM_VOTERS: 1@monitor_kafka:9093
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
+      KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
+    networks:
+      - shared_kafka_net
+
+  notification_app:
     build: .
-    container_name: notification_app
+    restart: on-failure
     ports:
       - "8080:8080"
     depends_on:
-      db:
-        condition: service_healthy
+      - notification_db
+      - monitor_kafka
     environment:
-      SPRING_DATASOURCE_URL: jdbc:postgresql://notification_db:5432/${DB_NAME}
-      DB_USER: ${DB_USER}
-      DB_PASSWORD: ${DB_PASSWORD}
-      MAIL_USERNAME: ${MAIL_USERNAME}
-      MAIL_PASSWORD: ${MAIL_PASSWORD}
+      - DB_HOST=notification_db
+      - DB_PORT=5432
+      - DB_NAME=${NOTIFICATION_DB_NAME:-notificationdb}
+      - DB_USER=${DB_USER:-postgres}
+      - DB_PASSWORD=${DB_PASSWORD:-password}
+      - MAIL_USERNAME=${MAIL_USERNAME:-test@yandex.ru}
+      - MAIL_PASSWORD=${MAIL_PASSWORD:-testpass}
+      - SPRING_KAFKA_BOOTSTRAP_SERVERS=monitor_kafka:29092
+    networks:
+      - shared_kafka_net
 
-volumes:
-  pgdata:
+networks:
+  shared_kafka_net:
+    name: shared_kafka_network
+    driver: bridge
