@@ -49,6 +49,7 @@ services:
       - MAIL_USERNAME=${MAIL_USERNAME:-test@yandex.ru}
       - MAIL_PASSWORD=${MAIL_PASSWORD:-testpass}
       - SPRING_KAFKA_BOOTSTRAP_SERVERS=monitor_kafka:29092
+      - TELEGRAM_BOT_TOKEN=${TELEGRAM_BOT_TOKEN}
     networks:
       - shared_kafka_net
 
