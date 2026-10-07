@@ -5,14 +5,11 @@ import com.example.Notification_hub.entity.Notification;
 import com.example.Notification_hub.entity.NotificationChannel;
 import com.example.Notification_hub.entity.NotificationStatus;
 import com.example.Notification_hub.repository.NotificationRepository;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.mail.MailException;
-import org.springframework.mail.SimpleMailMessage;
-import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Map;
@@ -34,25 +31,28 @@ public class NotificationSender {
 
 
     @Async("notificationExecutor")
-    public void send(Notification notification) {
-       try {
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    public void send(Long notificationId) {
+        Notification notification = repository.findById(notificationId).
+                orElseThrow(() -> new IllegalArgumentException("Уведомление не найдено"));
+       try{
            ChannelSender sender = senders.get(notification.getChannel());
-           if (sender == null){
-               throw new IllegalArgumentException("Канал не поддерживатеся " + notification.getChannel());
+           if(sender == null){
+               throw new IllegalArgumentException("Канал не поддерживается " + notification.getChannel());
            }
            sender.send(notification);
            notification.setStatus(NotificationStatus.SENT);
        }catch (Exception e){
            int retries = notification.getRetryCount() + 1;
            notification.setRetryCount(retries);
-           if (retries >= 3){
-               log.error("Исперпан лимит попыток для ID {}. Статус: FAILED. Ошибка: {}", notification.getId(), e.getMessage());
+           if(retries >= 3){
+               log.error("Исчепан лимит попыток для ID {}. error: {}", notification.getId(), e.getMessage());
                notification.setStatus(NotificationStatus.FAILED);
            }else{
-               log.warn("Ошибка отправки для ID {} (попытка {}/3). Вернули в PENDING", notification.getId(), notification.getRetryCount());
+               log.warn("Ошибка отправки для id {} (попыток {}/3). Вернули в PENDING", notification.getId(), notification.getRetryCount());
                notification.setStatus(NotificationStatus.PENDING);
            }
-           repository.save(notification);
        }
+       repository.save(notification);
     }
 }

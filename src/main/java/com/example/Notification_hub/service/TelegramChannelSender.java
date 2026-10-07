@@ -25,21 +25,18 @@ public class TelegramChannelSender implements ChannelSender {
     public void send(Notification notification) {
         log.info("Отправка TELEGRAM сообщения пользователю {}", notification.getRecipient());
 
-        try {
-            Map<String, String> payload = Map.of(
-                    "chat_id", notification.getRecipient(),
-                    "text", notification.getMessage()
-            );
-            restClient.post()
-                    .uri("/sendMessage")
-                    .body(payload)
-                    .retrieve()
-                    .toBodilessEntity();
+        Map<String, String> payload = Map.of(
+                "chat_id", notification.getRecipient(),
+                "text", notification.getMessage()
+        );
+        restClient.post()
+                .uri("/sendMessage")
+                .body(payload)
+                .retrieve()
+                .toBodilessEntity();
 
-            log.info("Сообщение успешно отправлено в Telegram");
-        } catch (Exception e) {
-            log.error("Ошибка при отправке сообщения в Telegram: {}", e.getMessage());
-        }
+        log.info("Сообщение успешно отправлено в Telegram");
+
     }
 
     @Override

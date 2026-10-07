@@ -36,7 +36,7 @@ public class NotificationWorker {
 
 
         for(Notification notification : lockedNotifications){
-           sender.send(notification);
+           sender.send(notification.getId());
         }
     }
 

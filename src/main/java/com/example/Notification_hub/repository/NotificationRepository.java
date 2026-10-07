@@ -19,7 +19,7 @@ import java.util.List;
 public interface NotificationRepository extends JpaRepository<Notification, Long> {
 
     @Lock(LockModeType.PESSIMISTIC_WRITE)
-    @QueryHints({@QueryHint(name = "jakarta.persistence.lock.timeout", value = "-2")})
+    @QueryHints({@QueryHint(name = "jakarta.persistence.lock.timeout", value = "-2")})  // -2 means SKIP LOCKED in Hibernate
     public List<Notification> findTop10ByStatusOrderByCreatedAtAsc(NotificationStatus status);
 
     List<Notification> findByStatusAndUpdatedAtBefore(NotificationStatus status, LocalDateTime thresholdTime);
